@@ -1,4 +1,4 @@
-name: CI
+name: CI-CD
 
 on:
   push:
@@ -7,6 +7,10 @@ on:
   pull_request:
     branches:
       - main
+
+permissions:
+  id-token: write
+  contents: read
 
 jobs:
   test:
@@ -26,3 +30,29 @@ jobs:
 
       - name: Run tests
         run: pytest
+
+  deploy:
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: arn:aws:iam::805493112559:role/GitHubActions-CAD-CD
+          aws-region: ap-south-1
+
+      - name: Prepare Lambda package
+        run: |
+          cp app.py lambda_function.py
+          zip function.zip lambda_function.py
+
+      - name: Deploy to AWS Lambda
+        run: |
+          aws lambda update-function-code \
+            --function-name CADDemoFunction \
+            --zip-file fileb://function.zip
