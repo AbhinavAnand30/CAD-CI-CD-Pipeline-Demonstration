@@ -158,7 +158,7 @@ def lambda_handler(event, context):
         return {
             "statusCode": 200,
             "body": json.dumps({
-                "message": "Build analysis completed successfully",
+                "message": "Build analysis completed successfully CI/CD",
                 "analysis": result
             })
         }
