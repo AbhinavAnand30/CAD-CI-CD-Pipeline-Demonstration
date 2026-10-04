@@ -26,32 +26,56 @@ The CI/CD pipeline automatically performs code quality checks and tests whenever
 ## Architecture
 
 ```text
-                    Developer
-                        |
-                        | git push
-                        v
-                 GitHub Repository
-                        |
-                        v
-                 GitHub Actions
-                        |
-              +---------+---------+
-              |                   |
-              v                   v
-          Ruff Lint        Pytest + Coverage
-              |                   |
-              +---------+---------+
-                        |
-                   Tests Pass
-                        |
-                        v
-                  GitHub OIDC
-                        |
-                        v
-                    AWS IAM
-                        |
-                        v
-                  AWS Lambda
-                        |
-                        v
-                CADDemoFunction
+CI/CD DEPLOYMENT PIPELINE
+=========================
+
+Developer
+    |
+    | git push
+    v
+GitHub Repository
+    |
+    v
+GitHub Actions
+    |
+    +-------------------+
+    |                   |
+    v                   v
+Ruff Lint        Pytest + Coverage
+    |                   |
+    +---------+---------+
+              |
+         Tests Pass
+              |
+              v
+        GitHub OIDC
+              |
+              v
+           AWS IAM
+              |
+              v
+         AWS Lambda
+              |
+              v
+       CADDemoFunction
+
+
+BUILD MONITORING
+================
+
+Build Status Request
+        |
+        v
+   API Gateway
+        |
+        v
+CICDBuildStatusHandler
+        |
+        +-------------------+
+        |                   |
+        v                   v
+    DynamoDB           PagerDuty
+        |              (if FAILED)
+        |                   |
+        v                   v
+ CloudWatch Logs       Incident
